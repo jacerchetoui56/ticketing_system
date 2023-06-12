@@ -10,58 +10,24 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-enum Roles {
-  SUPERADMIN
-  ADMIN
-  AGENT
-  CUSTOMER
-}
-
 model Role {
-  id     Int      @id @default(autoincrement())
-  role   Roles
-  user   Customer @relation(fields: [userId], references: [id])
-  userId Int      @unique
-  Agent  Agent[]
+  id   Int    @id @default(autoincrement())
+  name String
+  User User[]
 }
 
-model SuperAdmin {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  joined_at DateTime @default(now())
-}
-
-model Admin {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  joined_at DateTime @default(now())
-}
-
-model Agent {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  joined_at DateTime @default(now())
-  Ticket    Ticket[]
-  team      Team     @relation(fields: [teamId], references: [id])
-  teamId    Int
-  role      Role?    @relation(fields: [roleId], references: [id])
-  roleId    Int?
-}
-
-model Customer {
-  id        Int      @id @default(autoincrement())
-  name      String
-  email     String   @unique
-  password  String
-  joined_at DateTime @default(now())
-  Ticket    Ticket[]
-  role      Role?
+model User {
+  id               Int      @id @default(autoincrement())
+  name             String
+  email            String   @unique
+  password         String
+  joined_at        DateTime @default(now())
+  customer_tickets Ticket[] @relation("customer_tickets")
+  agent_tickets    Ticket[] @relation("agent_tickets")
+  team             Team?    @relation(fields: [teamId], references: [id])
+  teamId           Int?
+  Role             Role     @relation(fields: [roleId], references: [id])
+  roleId           Int
 }
 
 enum TicketState {
@@ -88,21 +54,21 @@ enum Rating {
 model Ticket {
   id         Int            @id @default(autoincrement())
   question   String
-  customer   Customer       @relation(references: [id], fields: [customerId])
-  customerId Int
-  priority   TicketPriority
-  state      TicketState
-  agent      Agent?         @relation(fields: [agentId], references: [id])
+  priority   TicketPriority @default(LOW)
+  state      TicketState    @default(WAITING)
+  agent      User?          @relation("agent_tickets", fields: [agentId], references: [id])
+  customer   User           @relation("customer_tickets", fields: [customerId], references: [id])
   agentId    Int?
+  customerId Int
   Answer     Answer[]
-  rating     Rating
+  rating     Rating?
   created_at DateTime       @default(now())
   updated_at DateTime       @updatedAt
 }
 
 model Answer {
   id         Int      @id @default(autoincrement())
-  ticket     Ticket   @relation(references: [id], fields: [ticketId])
+  ticket     Ticket   @relation(references: [id], fields: [ticketId], onDelete: Cascade)
   ticketId   Int
   answer     String
   created_at DateTime @default(now())
@@ -117,9 +83,9 @@ model Field {
 }
 
 model Team {
-  id      Int     @id @default(autoincrement())
+  id      Int    @id @default(autoincrement())
   name    String
-  field   Field   @relation(fields: [fieldId], references: [id])
+  field   Field  @relation(fields: [fieldId], references: [id])
   fieldId Int
-  Agent   Agent[]
+  Agent   User[]
 }

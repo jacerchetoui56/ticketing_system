@@ -1,8 +1,11 @@
 import {
+  BadRequestException,
+  ConflictException,
   Injectable,
   UnauthorizedException,
-  ConflictException,
 } from "@nestjs/common";
+import { JwtService } from "@nestjs/jwt";
+import * as bcrypt from "bcrypt";
 import { PrismaService } from "src/prisma/prisma.service";
 import {
   ChangePasswordDto,
@@ -10,8 +13,7 @@ import {
   CustomerSignup,
   LoginDto,
 } from "./dtos/auth.dto";
-import * as bcrypt from "bcrypt";
-import { JwtService } from "@nestjs/jwt";
+import { userRoles } from ".";
 
 @Injectable()
 export class AuthService {
@@ -20,92 +22,27 @@ export class AuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  async loginSuperAdmin({ email, password }: LoginDto) {
-    const superadmin = await this.prisma.superAdmin.findUnique({
+  async login({ email, password }: LoginDto, userRole: userRoles) {
+    const user = await this.prisma.user.findFirst({
       where: {
         email,
+        Role: {
+          name: userRoles[userRole],
+        },
       },
     });
 
-    if (!superadmin) {
+    if (!user) {
       throw new UnauthorizedException();
     }
 
-    const isCorrectPassword = await bcrypt.compare(
-      password,
-      superadmin.password,
-    );
+    const isCorrectPassword = await bcrypt.compare(password, user.password);
 
     if (!isCorrectPassword) {
       throw new UnauthorizedException();
     }
 
-    const payload = { id: superadmin.id, name: superadmin.name };
-    const token = await this.jwt.signAsync(payload);
-
-    return { token };
-  }
-
-  async loginAdmin({ email, password }: LoginDto) {
-    const admin = await this.prisma.admin.findUnique({
-      where: {
-        email,
-      },
-    });
-    if (!admin) {
-      throw new UnauthorizedException();
-    }
-
-    const isCorrectPassword = await bcrypt.compare(password, admin.password);
-
-    if (!isCorrectPassword) {
-      throw new UnauthorizedException();
-    }
-
-    const payload = { id: admin.id, name: admin.name };
-    const token = await this.jwt.signAsync(payload);
-
-    return { token };
-  }
-
-  async loginAgent({ email, password }: LoginDto) {
-    const agent = await this.prisma.agent.findUnique({
-      where: {
-        email,
-      },
-    });
-    if (!agent) {
-      throw new UnauthorizedException();
-    }
-
-    const isCorrectPassword = await bcrypt.compare(password, agent.password);
-
-    if (!isCorrectPassword) {
-      throw new UnauthorizedException();
-    }
-
-    const payload = { id: agent.id, name: agent.name };
-    const token = await this.jwt.signAsync(payload);
-
-    return { token };
-  }
-
-  async loginCustomer({ email, password }: LoginDto) {
-    const customer = await this.prisma.customer.findUnique({
-      where: {
-        email,
-      },
-    });
-    if (!customer) {
-      throw new UnauthorizedException();
-    }
-    const isCorrectPassword = await bcrypt.compare(password, customer.password);
-
-    if (!isCorrectPassword) {
-      throw new UnauthorizedException();
-    }
-
-    const payload = { id: customer.id, name: customer.name };
+    const payload = { id: user.id, name: user.name };
     const token = await this.jwt.signAsync(payload);
 
     return { token };
@@ -113,7 +50,8 @@ export class AuthService {
 
   async signupCustomer(credentials: CustomerSignup) {
     const { email, password, name } = credentials;
-    const customerExists = await this.prisma.customer.findFirst({
+
+    const customerExists = await this.prisma.user.findFirst({
       where: { email },
     });
 
@@ -123,15 +61,11 @@ export class AuthService {
 
     const hashedPass = await bcrypt.hash(password, 10);
 
-    const customer = await this.prisma.customer.create({
+    const customer = await this.prisma.user.create({
       data: {
         ...credentials,
         password: hashedPass,
-        role: {
-          create: {
-            role: "CUSTOMER",
-          },
-        },
+        roleId: 3,
       },
     });
 
@@ -145,35 +79,53 @@ export class AuthService {
     return { token };
   }
 
-  async getCustomerProfile(id: number) {
-    const customer = await this.prisma.customer.findFirst({ where: { id } });
-    return PrismaService.exclude(customer, ["password"]);
-  }
+  async createAgent(createAgentDto: CreateAgentDto) {
+    const { email, password, name } = createAgentDto;
 
-  async createAgent(newAgent: CreateAgentDto) {
-    const hashedPass = await bcrypt.hash(newAgent.password, 10);
-    const agent = await this.prisma.agent.create({
-      data: { ...newAgent, password: hashedPass },
+    const customerExists = await this.prisma.user.findFirst({
+      where: { email },
     });
 
-    return agent;
+    if (customerExists) {
+      throw new ConflictException();
+    }
+
+    const hashedPass = await bcrypt.hash(password, 10);
+
+    try {
+      const agent = await this.prisma.user.create({
+        data: {
+          ...createAgentDto,
+          password: hashedPass,
+          roleId: 2,
+        },
+      });
+
+      const payload = {
+        id: agent.id,
+        name: agent.name,
+      };
+
+      const token = await this.jwt.signAsync(payload);
+
+      return { token };
+    } catch (error) {
+      throw new BadRequestException();
+    }
   }
 
-  async customerChangePassword(userId: number, passwords: ChangePasswordDto) {
+  async changePassword(userId: number, passwords: ChangePasswordDto) {
     const { oldPassword, newPassword } = passwords;
 
-    const customer = await this.prisma.customer.findUnique({
+    const user = await this.prisma.user.findUnique({
       where: {
         id: userId,
       },
     });
-    if (!customer) {
+    if (!user) {
       throw new UnauthorizedException();
     }
-    const isCorrectPassword = await bcrypt.compare(
-      oldPassword,
-      customer.password,
-    );
+    const isCorrectPassword = await bcrypt.compare(oldPassword, user.password);
 
     if (!isCorrectPassword) {
       throw new UnauthorizedException();
@@ -181,7 +133,7 @@ export class AuthService {
 
     const hashedPass = await bcrypt.hash(newPassword, 10);
 
-    const changePass = await this.prisma.customer.update({
+    const changePass = await this.prisma.user.update({
       where: { id: userId },
       data: { password: hashedPass },
     });
@@ -189,57 +141,25 @@ export class AuthService {
     return "Pass is changed";
   }
 
-  async agentChangePassword(userId: number, passwords: ChangePasswordDto) {
-    const { oldPassword, newPassword } = passwords;
+  async getProfile(id: number) {
+    const user = await this.prisma.user.findUnique({ where: { id } });
 
-    const agent = await this.prisma.agent.findUnique({
-      where: {
-        id: userId,
-      },
-    });
-    if (!agent) {
-      throw new UnauthorizedException();
-    }
-    const isCorrectPassword = await bcrypt.compare(oldPassword, agent.password);
-
-    if (!isCorrectPassword) {
-      throw new UnauthorizedException();
-    }
-
-    const hashedPass = await bcrypt.hash(newPassword, 10);
-
-    const changePass = await this.prisma.agent.update({
-      where: { id: userId },
-      data: { password: hashedPass },
-    });
-
-    return "Pass is changed";
+    return PrismaService.exclude(user, ["password"]);
   }
 
-  async adminChangePassword(userId: number, passwords: ChangePasswordDto) {
-    const { oldPassword, newPassword } = passwords;
-
-    const admin = await this.prisma.admin.findUnique({
+  async userRole(userId: number) {
+    const user = await this.prisma.user.findFirst({
       where: {
         id: userId,
       },
+      select: {
+        Role: {
+          select: {
+            name: true,
+          },
+        },
+      },
     });
-    if (!admin) {
-      throw new UnauthorizedException();
-    }
-    const isCorrectPassword = await bcrypt.compare(oldPassword, admin.password);
-
-    if (!isCorrectPassword) {
-      throw new UnauthorizedException();
-    }
-
-    const hashedPass = await bcrypt.hash(newPassword, 10);
-
-    const changePass = await this.prisma.admin.update({
-      where: { id: userId },
-      data: { password: hashedPass },
-    });
-
-    return "Pass is changed";
+    return user;
   }
 }
