@@ -1,0 +1,125 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Roles {
+  SUPERADMIN
+  ADMIN
+  AGENT
+  CUSTOMER
+}
+
+model Role {
+  id     Int      @id @default(autoincrement())
+  role   Roles
+  user   Customer @relation(fields: [userId], references: [id])
+  userId Int      @unique
+  Agent  Agent[]
+}
+
+model SuperAdmin {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  joined_at DateTime @default(now())
+}
+
+model Admin {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  joined_at DateTime @default(now())
+}
+
+model Agent {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  joined_at DateTime @default(now())
+  Ticket    Ticket[]
+  team      Team     @relation(fields: [teamId], references: [id])
+  teamId    Int
+  role      Role?    @relation(fields: [roleId], references: [id])
+  roleId    Int?
+}
+
+model Customer {
+  id        Int      @id @default(autoincrement())
+  name      String
+  email     String   @unique
+  password  String
+  joined_at DateTime @default(now())
+  Ticket    Ticket[]
+  role      Role?
+}
+
+enum TicketState {
+  WAITING
+  PENDING
+  COMPLETED
+  RESOLVED
+  CANCELED
+}
+
+enum TicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum Rating {
+  POOR
+  AVERAGE
+  GOOD
+  EXCELLENT
+}
+
+model Ticket {
+  id         Int            @id @default(autoincrement())
+  question   String
+  customer   Customer       @relation(references: [id], fields: [customerId])
+  customerId Int
+  priority   TicketPriority
+  state      TicketState
+  agent      Agent?         @relation(fields: [agentId], references: [id])
+  agentId    Int?
+  Answer     Answer[]
+  rating     Rating
+  created_at DateTime       @default(now())
+  updated_at DateTime       @updatedAt
+}
+
+model Answer {
+  id         Int      @id @default(autoincrement())
+  ticket     Ticket   @relation(references: [id], fields: [ticketId])
+  ticketId   Int
+  answer     String
+  created_at DateTime @default(now())
+  updated_at DateTime @updatedAt
+}
+
+model Field {
+  id         Int      @id @default(autoincrement())
+  name       String
+  created_at DateTime @default(now())
+  Team       Team[]
+}
+
+model Team {
+  id      Int     @id @default(autoincrement())
+  name    String
+  field   Field   @relation(fields: [fieldId], references: [id])
+  fieldId Int
+  Agent   Agent[]
+}
