@@ -10,10 +10,10 @@ import { PrismaService } from "src/prisma/prisma.service";
 import {
   ChangePasswordDto,
   CreateAgentDto,
-  CustomerSignup,
+  CustomerSignupDto,
   LoginDto,
 } from "./dtos/auth.dto";
-import { userRoles } from ".";
+import { Roles } from "@prisma/client";
 
 @Injectable()
 export class AuthService {
@@ -22,13 +22,11 @@ export class AuthService {
     private readonly jwt: JwtService,
   ) {}
 
-  async login({ email, password }: LoginDto, userRole: userRoles) {
+  async login({ email, password }: LoginDto, role: Roles) {
     const user = await this.prisma.user.findFirst({
       where: {
         email,
-        Role: {
-          name: userRoles[userRole],
-        },
+        role,
       },
     });
 
@@ -48,8 +46,8 @@ export class AuthService {
     return { token };
   }
 
-  async signupCustomer(credentials: CustomerSignup) {
-    const { email, password, name } = credentials;
+  async signupCustomer(credentials: CustomerSignupDto) {
+    const { email, password } = credentials;
 
     const customerExists = await this.prisma.user.findFirst({
       where: { email },
@@ -65,7 +63,7 @@ export class AuthService {
       data: {
         ...credentials,
         password: hashedPass,
-        roleId: 3,
+        role: "customer",
       },
     });
 
@@ -80,7 +78,7 @@ export class AuthService {
   }
 
   async createAgent(createAgentDto: CreateAgentDto) {
-    const { email, password, name } = createAgentDto;
+    const { email, password } = createAgentDto;
 
     const customerExists = await this.prisma.user.findFirst({
       where: { email },
@@ -93,22 +91,15 @@ export class AuthService {
     const hashedPass = await bcrypt.hash(password, 10);
 
     try {
-      const agent = await this.prisma.user.create({
+      await this.prisma.user.create({
         data: {
           ...createAgentDto,
           password: hashedPass,
-          roleId: 2,
+          role: "agent",
         },
       });
 
-      const payload = {
-        id: agent.id,
-        name: agent.name,
-      };
-
-      const token = await this.jwt.signAsync(payload);
-
-      return { token };
+      return { message: "Agent created!" };
     } catch (error) {
       throw new BadRequestException();
     }
@@ -133,7 +124,7 @@ export class AuthService {
 
     const hashedPass = await bcrypt.hash(newPassword, 10);
 
-    const changePass = await this.prisma.user.update({
+    await this.prisma.user.update({
       where: { id: userId },
       data: { password: hashedPass },
     });
@@ -153,11 +144,7 @@ export class AuthService {
         id: userId,
       },
       select: {
-        Role: {
-          select: {
-            name: true,
-          },
-        },
+        role: true,
       },
     });
     return user;

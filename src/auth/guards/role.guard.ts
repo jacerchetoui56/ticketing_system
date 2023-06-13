@@ -9,28 +9,27 @@ export class RoleGuard implements CanActivate {
     private readonly reflector: Reflector,
     private readonly authService: AuthService,
   ) {}
+
   async canActivate(context: ExecutionContext) {
     const request = context.switchToHttp().getRequest();
     const allowedRoles = this.reflector.getAllAndOverride("roles", [
       context.getClass(),
       context.getHandler(),
     ]);
-    console.log(
-      "🚀 ~ file: role.guard.ts:18 ~ RoleGuard ~ allowedRoles:",
-      allowedRoles,
-    );
+
     if (!allowedRoles || allowedRoles.length === 0) {
       return true;
     }
 
-    const token: IUserFromToken = request["user"];
-    const userRole = await this.authService.userRole(token.id);
+    const user: IUserFromToken = request["user"];
+    const userRole = await this.authService.userRole(user.id);
 
-    if (!allowedRoles.includes(userRole.Role.name)) {
+    if (!allowedRoles.includes(userRole.role)) {
       console.log("Not Authorized ⚠️");
       return false;
     }
     console.log("Authorized ✅");
+    request["role"] = userRole.role;
     return true;
   }
 }

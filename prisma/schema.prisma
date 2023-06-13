@@ -10,10 +10,11 @@ datasource db {
   url      = env("DATABASE_URL")
 }
 
-model Role {
-  id   Int    @id @default(autoincrement())
-  name String
-  User User[]
+enum Roles {
+  superadmin
+  admin
+  agent
+  customer
 }
 
 model User {
@@ -26,8 +27,7 @@ model User {
   agent_tickets    Ticket[] @relation("agent_tickets")
   team             Team?    @relation(fields: [teamId], references: [id])
   teamId           Int?
-  Role             Role     @relation(fields: [roleId], references: [id])
-  roleId           Int
+  role             Roles
 }
 
 enum TicketState {
@@ -60,7 +60,7 @@ model Ticket {
   customer   User           @relation("customer_tickets", fields: [customerId], references: [id])
   agentId    Int?
   customerId Int
-  Answer     Answer[]
+  answer     Answer[]
   rating     Rating?
   created_at DateTime       @default(now())
   updated_at DateTime       @updatedAt

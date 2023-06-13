@@ -10,9 +10,9 @@ import {
 } from "@nestjs/common";
 import { Request } from "express";
 import { AuthService } from "./auth.service";
-import { CustomerSignup, LoginDto } from "./dtos/auth.dto";
+import { CreateAgentDto, CustomerSignupDto, LoginDto } from "./dtos/auth.dto";
 import { AuthGuard } from "./guards/auth.guard";
-import { userRoles } from ".";
+import { Roles } from "@prisma/client";
 
 @Controller("auth")
 export class AuthController {
@@ -21,14 +21,19 @@ export class AuthController {
   @Post("login/:userRole")
   login(
     @Body() credentials: LoginDto,
-    @Param("userRole", new ParseEnumPipe(userRoles)) userRole: userRoles,
+    @Param("userRole", new ParseEnumPipe(Roles)) userRole: Roles,
   ) {
     return this.authService.login(credentials, userRole);
   }
 
   @Post("signup")
-  signupCustomer(@Body() newCustomer: CustomerSignup) {
+  signupCustomer(@Body() newCustomer: CustomerSignupDto) {
     return this.authService.signupCustomer(newCustomer);
+  }
+
+  @Post("agent/new")
+  createAgent(@Body() newAgent: CreateAgentDto) {
+    return this.authService.createAgent(newAgent);
   }
 
   @Get("profile")

@@ -30,10 +30,6 @@ export class AuthGuard implements CanActivate {
         secret: process.env.JWT_SECRET_KEY,
       });
       request["user"] = user;
-      console.log(
-        "🚀 ~ file: auth.guard.ts:35 ~ AuthGuard ~ canActivate ~ user:",
-        user,
-      );
     } catch (error) {
       throw new UnauthorizedException();
     }

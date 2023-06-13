@@ -4,6 +4,7 @@ import {
   IsString,
   MinLength,
   IsNumber,
+  IsPositive,
 } from "class-validator";
 
 export class LoginDto {
@@ -17,7 +18,7 @@ export class LoginDto {
   password: string;
 }
 
-export class CustomerSignup {
+export class CustomerSignupDto {
   @IsNotEmpty()
   @IsString()
   name: string;
@@ -33,13 +34,6 @@ export class CustomerSignup {
   password: string;
 }
 
-export class CreateAgentDto extends CustomerSignup {
-  @IsNotEmpty()
-  @IsString()
-  @IsNumber()
-  teamId: number;
-}
-
 export class ChangePasswordDto {
   @IsNotEmpty()
   @IsString()
@@ -48,4 +42,11 @@ export class ChangePasswordDto {
   @IsNotEmpty()
   @IsString()
   newPassword: string;
+}
+
+export class CreateAgentDto extends CustomerSignupDto {
+  @IsNumber()
+  @IsPositive()
+  @IsNotEmpty()
+  teamId: number;
 }

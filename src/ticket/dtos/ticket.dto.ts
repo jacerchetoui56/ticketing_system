@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsString } from "class-validator";
+import { IsNotEmpty, IsNumber, IsString } from "class-validator";
 
 export class CreateTicketDto {
   @IsNotEmpty()
@@ -7,3 +7,14 @@ export class CreateTicketDto {
 }
 
 export class UpdateTicketDto extends CreateTicketDto {}
+
+export class TicketAnswerDto {
+  @IsNotEmpty()
+  @IsString()
+  answer: string;
+}
+
+export class AssignToAgentDto {
+  @IsNumber()
+  agentId: number;
+}
