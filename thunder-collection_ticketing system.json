@@ -1,0 +1,669 @@
+{
+    "client": "Thunder Client",
+    "collectionName": "ticketing system",
+    "dateExported": "2023-07-31T14:02:06.721Z",
+    "version": "1.1",
+    "folders": [
+        {
+            "_id": "61b36c8f-129c-42be-a8c6-93c4de36e821",
+            "name": "auth",
+            "containerId": "",
+            "created": "2023-06-12T11:22:15.421Z",
+            "sortNum": 10000
+        },
+        {
+            "_id": "bd704619-659b-485a-8fd4-488ef8c57b44",
+            "name": "admin",
+            "containerId": "61b36c8f-129c-42be-a8c6-93c4de36e821",
+            "created": "2023-06-12T11:22:22.125Z",
+            "sortNum": 20000
+        },
+        {
+            "_id": "f006faf7-7bae-4cbd-ae8c-dfab7d411077",
+            "name": "super admin",
+            "containerId": "61b36c8f-129c-42be-a8c6-93c4de36e821",
+            "created": "2023-06-12T11:27:28.053Z",
+            "sortNum": 30000
+        },
+        {
+            "_id": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "tickets",
+            "containerId": "",
+            "created": "2023-06-12T15:54:42.725Z",
+            "sortNum": 30000
+        },
+        {
+            "_id": "5ba60dfc-3e07-4f3f-82f9-f18df51d7e17",
+            "name": "agent",
+            "containerId": "61b36c8f-129c-42be-a8c6-93c4de36e821",
+            "created": "2023-06-12T13:12:45.082Z",
+            "sortNum": 40000
+        },
+        {
+            "_id": "de559f96-124e-4cdd-b742-b440bed2787e",
+            "name": "customer",
+            "containerId": "61b36c8f-129c-42be-a8c6-93c4de36e821",
+            "created": "2023-06-12T13:12:54.922Z",
+            "sortNum": 50000
+        },
+        {
+            "_id": "3bf2e693-6a33-4e70-9717-e6755062bed5",
+            "name": "team",
+            "containerId": "",
+            "created": "2023-06-13T14:40:10.648Z",
+            "sortNum": 60000
+        }
+    ],
+    "requests": [
+        {
+            "_id": "94f6ca1d-1181-41e5-b745-9e7f3d950d0c",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "bd704619-659b-485a-8fd4-488ef8c57b44",
+            "name": "login",
+            "url": "http://localhost:3000/auth/login/admin",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2023-06-12T11:22:26.222Z",
+            "modified": "2023-06-14T13:51:04.720Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"admin@gmail.com\",\n  \"password\" : \"pass\"\n}\n",
+                "form": []
+            },
+            "tests": [
+                {
+                    "type": "set-env-var",
+                    "custom": "json.token",
+                    "action": "setto",
+                    "value": "{{token.admin_token}}"
+                }
+            ]
+        },
+        {
+            "_id": "5230f6e0-3466-4091-9a8f-3ee0be35cf87",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "f006faf7-7bae-4cbd-ae8c-dfab7d411077",
+            "name": "login",
+            "url": "http://localhost:3000/auth/login/superadmin",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2023-06-12T11:27:28.053Z",
+            "modified": "2023-06-12T14:47:14.854Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"super@super.com\",\n  \"password\" : \"superadminpass\"\n}",
+                "form": []
+            },
+            "tests": [
+                {
+                    "type": "set-env-var",
+                    "custom": "json.token",
+                    "action": "setto",
+                    "value": "{{token.superadmin_token}}"
+                }
+            ]
+        },
+        {
+            "_id": "7f7c4ded-d053-4e3f-9952-de0365901505",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "5ba60dfc-3e07-4f3f-82f9-f18df51d7e17",
+            "name": "login",
+            "url": "http://localhost:3000/auth/login/agent",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2023-06-12T13:12:45.082Z",
+            "modified": "2023-06-13T16:02:09.911Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"agentfour@gmail.com\",\n  \"password\" : \"changeme\"\n}",
+                "form": []
+            },
+            "tests": [
+                {
+                    "type": "set-env-var",
+                    "custom": "json.token",
+                    "action": "setto",
+                    "value": "{{token.agent_token}}"
+                }
+            ]
+        },
+        {
+            "_id": "f0a40586-716d-41e6-8e48-37030c0793ef",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "de559f96-124e-4cdd-b742-b440bed2787e",
+            "name": "login",
+            "url": "http://localhost:3000/auth/login/customer",
+            "method": "POST",
+            "sortNum": 10000,
+            "created": "2023-06-12T13:12:54.922Z",
+            "modified": "2023-06-15T14:50:11.599Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"email\": \"jacer@gmail.com\",\n  \"password\" : \"pass\"\n}",
+                "form": []
+            },
+            "tests": [
+                {
+                    "type": "set-env-var",
+                    "custom": "json.token",
+                    "action": "setto",
+                    "value": "{{token.customer_token}}"
+                }
+            ]
+        },
+        {
+            "_id": "3d63e32b-0fde-4680-a896-05a5d1d3d518",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "5ba60dfc-3e07-4f3f-82f9-f18df51d7e17",
+            "name": "Create Agent",
+            "url": "http://localhost:3000/auth/agent/new",
+            "method": "POST",
+            "sortNum": 15000,
+            "created": "2023-06-13T14:51:48.520Z",
+            "modified": "2023-06-13T15:46:00.011Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\" : \"agent four\",\n  \"teamId\" : 4,\n  \"email\": \"agentfour@gmail.com\",\n  \"password\" : \"changeme\"\n}",
+                "form": []
+            },
+            "tests": [
+                {
+                    "type": "set-env-var",
+                    "custom": "json.token",
+                    "action": "setto",
+                    "value": "{{token.agent_token}}"
+                }
+            ]
+        },
+        {
+            "_id": "3af6bbcd-80a5-4faa-ab0a-52fb99bda767",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "de559f96-124e-4cdd-b742-b440bed2787e",
+            "name": "signup",
+            "url": "http://localhost:3000/auth/signup",
+            "method": "POST",
+            "sortNum": 20000,
+            "created": "2023-06-12T13:35:02.476Z",
+            "modified": "2023-06-13T15:51:25.099Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\": \"khaled\",\n  \"email\": \"khaled@gmail.com\",\n  \"password\" : \"khaledpass\"\n}",
+                "form": []
+            },
+            "tests": [
+                {
+                    "type": "set-env-var",
+                    "custom": "json.token",
+                    "action": "setto",
+                    "value": "{{token.customer_token}}"
+                }
+            ]
+        },
+        {
+            "_id": "516da0cb-73fe-48e7-bcff-a9dc7729b0f0",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "5ba60dfc-3e07-4f3f-82f9-f18df51d7e17",
+            "name": "GET profile Copy",
+            "url": "http://localhost:3000/auth/profile",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2023-06-12T14:42:33.411Z",
+            "modified": "2023-06-12T14:42:34.806Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "056fcce2-45d8-4846-95c5-22366d4162c4",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "f006faf7-7bae-4cbd-ae8c-dfab7d411077",
+            "name": "GET profile Copy",
+            "url": "http://localhost:3000/auth/profile",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2023-06-12T14:42:36.891Z",
+            "modified": "2023-06-12T14:42:38.446Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "5625abbb-dd7b-40f6-a090-0405d2ecc1b5",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "bd704619-659b-485a-8fd4-488ef8c57b44",
+            "name": "GET profile Copy",
+            "url": "http://localhost:3000/auth/profile",
+            "method": "GET",
+            "sortNum": 20000,
+            "created": "2023-06-12T14:42:40.315Z",
+            "modified": "2023-06-12T14:42:41.832Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "f5e03c75-f954-4a0f-96ce-d7bf15caec5e",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "de559f96-124e-4cdd-b742-b440bed2787e",
+            "name": "GET profile",
+            "url": "http://localhost:3000/auth/profile",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2023-06-12T14:39:31.269Z",
+            "modified": "2023-06-12T14:42:53.117Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.customer_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "cd8f4295-0c60-4ecf-aac3-9ac893e04b9a",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "Get All Tickets",
+            "url": "http://localhost:3000/ticket/all",
+            "method": "GET",
+            "sortNum": 30000,
+            "created": "2023-06-12T15:54:51.029Z",
+            "modified": "2023-06-13T09:18:34.532Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.admin_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "8897b308-9af1-46d7-834e-8ddc0d8d09fb",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "Get Agent Tickets",
+            "url": "http://localhost:3000/ticket/agent/8",
+            "method": "GET",
+            "sortNum": 32500,
+            "created": "2023-06-13T09:18:57.997Z",
+            "modified": "2023-06-13T15:55:31.883Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.admin_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "a005da42-e293-439f-96b3-c51a704699f0",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "Get Customer Tickets",
+            "url": "http://localhost:3000/ticket/customer",
+            "method": "GET",
+            "sortNum": 33750,
+            "created": "2023-06-13T09:40:41.909Z",
+            "modified": "2023-06-13T16:10:33.086Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.customer_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "62e09428-7c2e-4278-a8fb-e7b8067a129c",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "Get Waiting tickets",
+            "url": "http://localhost:3000/ticket/waiting",
+            "method": "GET",
+            "sortNum": 35000,
+            "created": "2023-06-13T09:10:51.525Z",
+            "modified": "2023-06-13T09:11:06.786Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.admin_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "89d3d31e-d248-4f67-b1ec-29e8bfd777d5",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "Create Ticket",
+            "url": "http://localhost:3000/ticket/new",
+            "method": "POST",
+            "sortNum": 40000,
+            "created": "2023-06-13T09:08:40.363Z",
+            "modified": "2023-06-13T15:50:34.751Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"question\" : \"first khaled question\"\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.customer_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "8a0e8d44-ba74-4c60-acd8-f3dd5444090e",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "Answer ticket",
+            "url": "http://localhost:3000/ticket/2/answer",
+            "method": "POST",
+            "sortNum": 42500,
+            "created": "2023-06-13T09:53:05.113Z",
+            "modified": "2023-06-13T14:21:34.737Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"answer\" : \"this is an answer\"\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.agent_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "6de45ece-a045-410f-acea-2c6ddb24be5d",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "Update ticket",
+            "url": "http://localhost:3000/ticket/1",
+            "method": "PATCH",
+            "sortNum": 45000,
+            "created": "2023-06-13T09:45:02.733Z",
+            "modified": "2023-06-13T14:29:32.455Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"question\" : \"updated question\"\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.customer_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "9a8b8c67-4249-456c-83de-01c59881e2ff",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "Cancel ticket",
+            "url": "http://localhost:3000/ticket/3/cancel",
+            "method": "DELETE",
+            "sortNum": 47500,
+            "created": "2023-06-13T09:49:24.069Z",
+            "modified": "2023-06-13T15:52:55.979Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.customer_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "bf1f1b10-c9f8-4207-ae2e-9bd937ef9284",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "Assign To Agent",
+            "url": "http://localhost:3000/ticket/3/assign",
+            "method": "POST",
+            "sortNum": 50000,
+            "created": "2023-06-13T09:16:41.273Z",
+            "modified": "2023-06-13T15:55:12.984Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"agentId\" : 7\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.admin_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "fe43bee0-60ed-47b0-bf77-5920598c8b05",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "3bf2e693-6a33-4e70-9717-e6755062bed5",
+            "name": "Get all teams",
+            "url": "http://localhost:3000/team/all",
+            "method": "GET",
+            "sortNum": 50000,
+            "created": "2023-06-13T14:40:27.726Z",
+            "modified": "2023-06-13T14:56:38.777Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.admin_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "3fb5c3a7-fb5c-4ec6-af85-416c89baf315",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "Reopen ticket",
+            "url": "http://localhost:3000/ticket/3/reopen",
+            "method": "POST",
+            "sortNum": 60000,
+            "created": "2023-06-13T14:24:56.958Z",
+            "modified": "2023-06-13T15:56:58.850Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.customer_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "95503b9f-c266-4644-876b-bb4e9f1bed55",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "3bf2e693-6a33-4e70-9717-e6755062bed5",
+            "name": "Get Fields",
+            "url": "http://localhost:3000/fields",
+            "method": "GET",
+            "sortNum": 60000,
+            "created": "2023-06-13T14:40:59.155Z",
+            "modified": "2023-06-13T14:58:20.472Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.admin_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "8cb80ab7-b7f3-41b1-afdd-16df860315d6",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "3bf2e693-6a33-4e70-9717-e6755062bed5",
+            "name": "Get Teams of Field",
+            "url": "http://localhost:3000/team/field/1",
+            "method": "GET",
+            "sortNum": 70000,
+            "created": "2023-06-13T14:42:48.382Z",
+            "modified": "2023-06-13T14:58:49.318Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.admin_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "bd204873-241f-4f13-b2bb-a976e8f39189",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "3bf2e693-6a33-4e70-9717-e6755062bed5",
+            "name": "Get Teams members",
+            "url": "http://localhost:3000/team/3/members",
+            "method": "GET",
+            "sortNum": 80000,
+            "created": "2023-06-13T14:44:36.978Z",
+            "modified": "2023-06-13T15:48:20.594Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.admin_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "4ad3239a-7203-48f2-b94c-24cb5cdd3c11",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "3bf2e693-6a33-4e70-9717-e6755062bed5",
+            "name": "Create Team",
+            "url": "http://localhost:3000/team/new",
+            "method": "POST",
+            "sortNum": 90000,
+            "created": "2023-06-13T14:45:22.572Z",
+            "modified": "2023-06-13T15:47:02.243Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\" : \"devops team\",\n  \"fieldId\" : 1\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.admin_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "f7af9347-6bf2-444d-8661-cbb87b7707ed",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "3bf2e693-6a33-4e70-9717-e6755062bed5",
+            "name": "Add agent to team",
+            "url": "http://localhost:3000/team/5/add",
+            "method": "POST",
+            "sortNum": 100000,
+            "created": "2023-06-13T14:46:13.854Z",
+            "modified": "2023-06-13T15:47:55.416Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"agentId\" : 8\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.admin_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "9aa0813a-c724-49d9-a829-ad1019a1422c",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "3bf2e693-6a33-4e70-9717-e6755062bed5",
+            "name": "Create field",
+            "url": "http://localhost:3000/field/new",
+            "method": "POST",
+            "sortNum": 110000,
+            "created": "2023-06-13T14:47:10.775Z",
+            "modified": "2023-06-13T15:01:41.366Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"name\" : \"devops\"\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.admin_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "e5d8209d-a4cb-43c8-af42-5eef5a9eb5ac",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "Get ratings",
+            "url": "http://localhost:3000/ticket/ratings",
+            "method": "GET",
+            "sortNum": 120000,
+            "created": "2023-06-14T08:55:29.548Z",
+            "modified": "2023-06-14T08:56:54.828Z",
+            "headers": [],
+            "params": [],
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.customer_token}}"
+            },
+            "tests": []
+        },
+        {
+            "_id": "43eb92ed-c4cc-4d6b-a570-d79c5a7885df",
+            "colId": "1bb66289-ae7e-469b-8d42-1286f6561e8c",
+            "containerId": "c21efca3-40e5-40cd-81dd-5da16c234ab1",
+            "name": "Rate Ticket",
+            "url": "http://localhost:3000/ticket/2/rating",
+            "method": "POST",
+            "sortNum": 130000,
+            "created": "2023-06-14T08:57:16.831Z",
+            "modified": "2023-06-14T13:39:53.556Z",
+            "headers": [],
+            "params": [],
+            "body": {
+                "type": "json",
+                "raw": "{\n  \"rating\": \"EXCELLENT\"\n}",
+                "form": []
+            },
+            "auth": {
+                "type": "bearer",
+                "bearer": "{{token.customer_token}}"
+            },
+            "tests": []
+        }
+    ]
+}
