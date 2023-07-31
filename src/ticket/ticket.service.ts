@@ -1,16 +1,23 @@
-import { BadRequestException, Injectable } from "@nestjs/common";
+import { BadRequestException, Injectable, Logger } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import {
   TicketAnswerDto,
   CreateTicketDto,
   UpdateTicketDto,
+  RateDto,
 } from "./dtos/ticket.dto";
+import { Rating } from "@prisma/client";
+import { MyLogger } from "../my-logger/my-logger.service";
 
 @Injectable()
 export class TicketService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly logger: MyLogger,
+  ) {}
 
   async getAllTickets() {
+    this.logger.log("getting all tickets");
     const tickets = await this.prisma.ticket.findMany({
       select: {
         id: true,
@@ -21,6 +28,7 @@ export class TicketService {
         agent: {
           select: { id: true, name: true },
         },
+        rating: true,
         state: true,
         answer: {
           select: {
@@ -34,6 +42,7 @@ export class TicketService {
   }
 
   async getWaitingTickets() {
+    this.logger.log("getting WAITING tickets");
     const tickets = await this.prisma.ticket.findMany({
       where: {
         state: "WAITING",
@@ -44,6 +53,7 @@ export class TicketService {
   }
 
   async getPendingTickets() {
+    this.logger.log("getting PENDING tickets");
     const tickets = await this.prisma.ticket.findMany({
       where: {
         state: "PENDING",
@@ -54,6 +64,7 @@ export class TicketService {
   }
 
   async getCustomerTickets(customerId: number) {
+    this.logger.log(`getting tickets of Customer #${customerId}`);
     const tickets = await this.prisma.ticket.findMany({
       where: {
         customerId,
@@ -67,6 +78,7 @@ export class TicketService {
   }
 
   async createTicket(newTicket: CreateTicketDto, customerId: number) {
+    this.logger.log(`Creating a ticket for Customer #${customerId}`);
     const ticket = await this.prisma.ticket.create({
       data: {
         ...newTicket,
@@ -78,6 +90,7 @@ export class TicketService {
   }
 
   async assignToAgent(ticketId: number, agentId: number) {
+    this.logger.log(`Assigning ticket #${ticketId} to Agent #${agentId}`);
     const alreadyAssigned = await this.prisma.ticket.findUnique({
       where: { id: ticketId },
       select: { agentId: true, agent: { select: { name: true } }, state: true },
@@ -109,6 +122,7 @@ export class TicketService {
   }
 
   async getAgentTickets(agentId: number) {
+    this.logger.log(`getting the ticket of the agent #${agentId}`);
     const tickets = await this.prisma.ticket.findMany({
       where: {
         agentId,
@@ -122,6 +136,9 @@ export class TicketService {
   }
 
   async answerTicket(ticketId: number, ticketAnswer: TicketAnswerDto) {
+    this.logger.log(
+      `Ticket ${ticketId} is answered with ${ticketAnswer.answer}`,
+    );
     await this.prisma.answer.create({
       data: {
         ticketId,
@@ -139,6 +156,9 @@ export class TicketService {
   }
 
   async updateTicketQuestion(ticketId: number, updates: UpdateTicketDto) {
+    this.logger.log(
+      `Question of ticker #${ticketId} is updated to ${updates.question}`,
+    );
     const checkTicket = await this.prisma.ticket.findFirst({
       where: { id: ticketId },
     });
@@ -156,7 +176,10 @@ export class TicketService {
     return ticket;
   }
 
-  async checkTickerAgentOwnership(ticketId: number, agentId: number) {
+  async checkTicketAgentOwnership(ticketId: number, agentId: number) {
+    this.logger.log(
+      `Checking ticket #${ticketId} ownership to agent #${agentId}`,
+    );
     const ticket = await this.prisma.ticket.findFirst({
       where: {
         id: ticketId,
@@ -168,6 +191,9 @@ export class TicketService {
   }
 
   async checkTicketCustomerOwnership(ticketId: number, customerId: number) {
+    this.logger.log(
+      `Checking ticket #${ticketId} ownership to customer #${customerId}`,
+    );
     const ticket = await this.prisma.ticket.findFirst({
       where: {
         id: ticketId,
@@ -178,21 +204,23 @@ export class TicketService {
     return ticket ? true : false;
   }
 
-  async cancelTicket(id: number) {
+  async cancelTicket(ticketId: number) {
+    this.logger.log(`Canceling Ticket #${ticketId}`);
     const checkTicket = await this.prisma.ticket.findFirst({
-      where: { id },
+      where: { id: ticketId },
     });
     if (["PENDING", "COMPLETED", "RESOLVED"].includes(checkTicket.state)) {
       throw new BadRequestException("You can not cancel ticket now");
     }
     const ticket = await this.prisma.ticket.update({
-      where: { id },
+      where: { id: ticketId },
       data: { state: "CANCELED" },
     });
     return ticket;
   }
 
   async reopenTicket(ticketId: number) {
+    this.logger.log(`Reopen the ticket #${ticketId}`);
     const checkTicket = await this.prisma.ticket.findFirst({
       where: { id: ticketId },
     });
@@ -206,5 +234,42 @@ export class TicketService {
     });
 
     return ticket;
+  }
+
+  async rateTicket(ticketId: number, { rating }: RateDto) {
+    this.logger.log(`Rating ticket #${ticketId} with "${rating}"`);
+    const ticket = await this.prisma.ticket.update({
+      where: { id: ticketId },
+      data: {
+        rating,
+        state: "COMPLETED",
+      },
+    });
+
+    return ticket;
+  }
+
+  async getRatings() {
+    this.logger.log("Getting ratings");
+    return { ...Rating };
+  }
+
+  async checkTicketClosing() {
+    this.logger.log("Closing Forgotten Tickets 🕒");
+    const threeDaysAgo = new Date();
+    threeDaysAgo.setDate(threeDaysAgo.getDay() - 3);
+
+    await this.prisma.ticket.updateMany({
+      where: {
+        rating: null,
+        state: "COMPLETED",
+        updated_at: {
+          lt: threeDaysAgo,
+        },
+      },
+      data: {
+        state: "CLOSED",
+      },
+    });
   }
 }

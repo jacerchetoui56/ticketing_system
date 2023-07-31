@@ -2,6 +2,7 @@ import { CanActivate, ExecutionContext, Injectable } from "@nestjs/common";
 import { Reflector } from "@nestjs/core";
 import { AuthService } from "../auth.service";
 import { IUserFromToken } from "./auth.guard";
+import { Request } from "express";
 
 @Injectable()
 export class RoleGuard implements CanActivate {
@@ -11,7 +12,7 @@ export class RoleGuard implements CanActivate {
   ) {}
 
   async canActivate(context: ExecutionContext) {
-    const request = context.switchToHttp().getRequest();
+    const request: Request = context.switchToHttp().getRequest();
     const allowedRoles = this.reflector.getAllAndOverride("roles", [
       context.getClass(),
       context.getHandler(),

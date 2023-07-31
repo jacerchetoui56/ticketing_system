@@ -22,7 +22,7 @@ export class TicketOwnershipGuard implements CanActivate {
     let isOwner = false;
 
     if (role === "agent") {
-      isOwner = await this.ticketService.checkTickerAgentOwnership(
+      isOwner = await this.ticketService.checkTicketAgentOwnership(
         ticketId,
         userId,
       );

@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   ConflictException,
+  ForbiddenException,
   Injectable,
   UnauthorizedException,
 } from "@nestjs/common";
@@ -14,15 +15,18 @@ import {
   LoginDto,
 } from "./dtos/auth.dto";
 import { Roles } from "@prisma/client";
+import { MyLogger } from "src/my-logger/my-logger.service";
 
 @Injectable()
 export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly jwt: JwtService,
+    private readonly logger: MyLogger,
   ) {}
 
   async login({ email, password }: LoginDto, role: Roles) {
+    this.logger.log(`${email} is logging`);
     const user = await this.prisma.user.findFirst({
       where: {
         email,
@@ -31,22 +35,28 @@ export class AuthService {
     });
 
     if (!user) {
-      throw new UnauthorizedException();
+      this.logger.error(`${email} logging is denied`);
+      throw new ForbiddenException();
     }
 
     const isCorrectPassword = await bcrypt.compare(password, user.password);
 
     if (!isCorrectPassword) {
+      this.logger.error(`${email} passpord is wrong`);
       throw new UnauthorizedException();
     }
 
     const payload = { id: user.id, name: user.name };
     const token = await this.jwt.signAsync(payload);
 
+    this.logger.log(`${email} is logged in successfully`);
+
     return { token };
   }
 
   async signupCustomer(credentials: CustomerSignupDto) {
+    this.logger.log(`${credentials.email} is signing up`);
+
     const { email, password } = credentials;
 
     const customerExists = await this.prisma.user.findFirst({
@@ -54,6 +64,9 @@ export class AuthService {
     });
 
     if (customerExists) {
+      this.logger.error(
+        `${credentials.email} signing is denied : customer already exists`,
+      );
       throw new ConflictException();
     }
 
@@ -74,10 +87,13 @@ export class AuthService {
 
     const token = await this.jwt.signAsync(payload);
 
+    this.logger.log(`${credentials.email} is signed in successfully`);
+
     return { token };
   }
 
   async createAgent(createAgentDto: CreateAgentDto) {
+    this.logger.log(`Admin is creating agent : ${createAgentDto.email}`);
     const { email, password } = createAgentDto;
 
     const customerExists = await this.prisma.user.findFirst({
@@ -85,6 +101,9 @@ export class AuthService {
     });
 
     if (customerExists) {
+      this.logger.error(
+        `Creating agent ${createAgentDto.email} is denied : agent already exists`,
+      );
       throw new ConflictException();
     }
 
@@ -99,6 +118,8 @@ export class AuthService {
         },
       });
 
+      this.logger.log(`Creating agent ${createAgentDto.email} is successful`);
+
       return { message: "Agent created!" };
     } catch (error) {
       throw new BadRequestException();
@@ -106,6 +127,8 @@ export class AuthService {
   }
 
   async changePassword(userId: number, passwords: ChangePasswordDto) {
+    this.logger.log(`user #${userId} is changing password`);
+
     const { oldPassword, newPassword } = passwords;
 
     const user = await this.prisma.user.findUnique({
@@ -114,6 +137,7 @@ export class AuthService {
       },
     });
     if (!user) {
+      this.logger.error(`user #${userId} changing password is denied`);
       throw new UnauthorizedException();
     }
     const isCorrectPassword = await bcrypt.compare(oldPassword, user.password);
@@ -133,12 +157,14 @@ export class AuthService {
   }
 
   async getProfile(id: number) {
+    this.logger.log(`user #${id} is getting his profile`);
     const user = await this.prisma.user.findUnique({ where: { id } });
 
     return PrismaService.exclude(user, ["password"]);
   }
 
   async userRole(userId: number) {
+    this.logger.log(`Getting the role of the user #${userId}`);
     const user = await this.prisma.user.findFirst({
       where: {
         id: userId,

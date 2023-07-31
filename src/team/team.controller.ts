@@ -17,8 +17,11 @@ import { Roles } from "@prisma/client";
 import { AuthGuard } from "src/auth/guards/auth.guard";
 import { RoleGuard } from "src/auth/guards/role.guard";
 import { TeamService } from "./team.service";
+import { ApiBearerAuth, ApiTags } from "@nestjs/swagger";
 
 @Controller()
+@ApiBearerAuth()
+@ApiTags("Teams")
 @UseGuards(AuthGuard, RoleGuard)
 export class TeamController {
   constructor(private readonly teamService: TeamService) {}

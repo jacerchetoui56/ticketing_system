@@ -36,6 +36,7 @@ enum TicketState {
   COMPLETED
   RESOLVED
   CANCELED
+  CLOSED
 }
 
 enum TicketPriority {

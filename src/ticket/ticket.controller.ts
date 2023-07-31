@@ -9,22 +9,48 @@ import {
   Post,
   Req,
   UseGuards,
+  Query,
 } from "@nestjs/common";
+import {
+  ApiBearerAuth,
+  ApiBody,
+  ApiProperty,
+  ApiQuery,
+  ApiTags,
+} from "@nestjs/swagger";
+import { Rating, Roles } from "@prisma/client";
 import { Request } from "express";
-import { Roles } from "@prisma/client";
 import { AllowedRoles } from "src/auth/decorators/role.decorator";
 import { AuthGuard, IUserFromToken } from "src/auth/guards/auth.guard";
 import { RoleGuard } from "src/auth/guards/role.guard";
 import {
   AssignToAgentDto,
   CreateTicketDto,
+  RateDto,
   TicketAnswerDto,
   UpdateTicketDto,
 } from "./dtos/ticket.dto";
 import { TicketOwnershipGuard } from "./guards/ticketownership.guard";
 import { TicketService } from "./ticket.service";
 
+class Nested {
+  @ApiProperty()
+  age: number;
+  @ApiProperty()
+  parent: string;
+}
+
+class QueryType {
+  @ApiProperty()
+  name: string;
+
+  @ApiProperty()
+  details: Nested;
+}
+
 @Controller("ticket")
+@ApiTags("Tickets")
+@ApiBearerAuth()
 @UseGuards(AuthGuard, RoleGuard)
 export class TicketController {
   constructor(private readonly ticketService: TicketService) {}
@@ -109,5 +135,27 @@ export class TicketController {
     @Body() ticketAnswer: TicketAnswerDto,
   ) {
     return this.ticketService.answerTicket(ticketId, ticketAnswer);
+  }
+
+  @Post(":id/rating")
+  @AllowedRoles(Roles.customer)
+  @UseGuards(TicketOwnershipGuard)
+  rateTicket(
+    @Body() rating: RateDto,
+    @Param("id", ParseIntPipe) ticketId: number,
+  ) {
+    return this.ticketService.rateTicket(ticketId, rating);
+  }
+
+  @Get("ratings")
+  getRatings() {
+    return this.ticketService.getRatings();
+  }
+
+  @Get("test")
+  @ApiQuery({ name: "query", type: QueryType })
+  test(@Query("query") query: any) {
+    console.log(query);
+    return "test";
   }
 }

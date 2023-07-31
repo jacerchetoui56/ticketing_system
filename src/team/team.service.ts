@@ -1,24 +1,31 @@
 import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateFieldDto, CreateTeamDto } from "./dtos/team.dto";
+import { MyLogger } from "src/my-logger/my-logger.service";
 
 @Injectable()
 export class TeamService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly logger: MyLogger,
+  ) {}
 
   async getAllTeams() {
+    this.logger.log(`Getting all teams`);
     const teams = await this.prisma.team.findMany();
 
     return teams;
   }
 
   async getFieldsList() {
+    this.logger.log(`Getting all fields`);
     const fields = await this.prisma.field.findMany();
 
     return fields;
   }
 
   async getTeamsOfField(fieldId: number) {
+    this.logger.log(`Getting teams of field #${fieldId}`);
     const teams = await this.prisma.team.findMany({
       where: {
         fieldId,
@@ -29,6 +36,7 @@ export class TeamService {
   }
 
   async getTeamMembers(teamId: number) {
+    this.logger.log(`Getting the members of the team #${teamId}`);
     const agents = await this.prisma.user.findMany({
       where: {
         role: "agent",
@@ -41,6 +49,7 @@ export class TeamService {
   }
 
   async createTeam(newTeam: CreateTeamDto) {
+    this.logger.log("Admin is creating a new team");
     const team = await this.prisma.team.create({
       data: newTeam,
     });
@@ -49,6 +58,7 @@ export class TeamService {
   }
 
   async addAgentToTeam(agentId: number, teamId: number) {
+    this.logger.log(`Admin is adding the agent #${agentId} to team #${teamId}`);
     const agentExists = await this.prisma.user.findFirst({
       where: {
         id: agentId,
@@ -57,6 +67,9 @@ export class TeamService {
     });
 
     if (!agentExists) {
+      this.logger.error(
+        `Adding the agent #${agentId} to team #${teamId} is denied`,
+      );
       throw new BadRequestException("agent does not exist");
     }
 
@@ -71,6 +84,7 @@ export class TeamService {
   }
 
   async createField(newField: CreateFieldDto) {
+    this.logger.log(`Admin is creating a new Field`);
     const field = await this.prisma.field.create({
       data: newField,
     });
