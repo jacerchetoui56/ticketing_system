@@ -49,7 +49,7 @@ And then create a superadmin manually. Here is an example of a superadmin object
 7. Open Swagger UI in your browser by going to the following URL
 
 ```bash
-http://localhost:3000/api
+http://localhost:3000/api/docs
 ```
 
 **Note:** If you want to make requests using Postman you can download the _"ticketing-system.postman_collection.json"_ file and import it in your postman.
