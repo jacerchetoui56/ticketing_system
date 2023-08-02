@@ -10,7 +10,9 @@ import * as bcrypt from "bcrypt";
 import { PrismaService } from "src/prisma/prisma.service";
 import {
   ChangePasswordDto,
+  CreateAdminDto,
   CreateAgentDto,
+  CreateSuperAdminDto,
   CustomerSignupDto,
   LoginDto,
 } from "./dtos/auth.dto";
@@ -121,6 +123,78 @@ export class AuthService {
       this.logger.log(`Creating agent ${createAgentDto.email} is successful`);
 
       return { message: "Agent created!" };
+    } catch (error) {
+      throw new BadRequestException();
+    }
+  }
+
+  async createAdmin(createAdminDto: CreateAdminDto) {
+    this.logger.log(`Super Admin is creating admin : ${createAdminDto.email}`);
+    const { email, password } = createAdminDto;
+
+    const customerExists = await this.prisma.user.findFirst({
+      where: { email },
+    });
+
+    if (customerExists) {
+      this.logger.error(
+        `Creating admin ${createAdminDto.email} is denied : admin already exists`,
+      );
+      throw new ConflictException();
+    }
+
+    const hashedPass = await bcrypt.hash(password, 10);
+
+    try {
+      await this.prisma.user.create({
+        data: {
+          ...createAdminDto,
+          password: hashedPass,
+          role: "admin",
+        },
+      });
+
+      this.logger.log(`Creating admin ${createAdminDto.email} is successful`);
+
+      return { message: "Admin created!" };
+    } catch (error) {
+      throw new BadRequestException();
+    }
+  }
+
+  async createSuperAdmin(createSuperAdminDto: CreateSuperAdminDto) {
+    this.logger.log(
+      `Super Admin is creating super admin : ${createSuperAdminDto.email}`,
+    );
+    const { email, password } = createSuperAdminDto;
+
+    const customerExists = await this.prisma.user.findFirst({
+      where: { email },
+    });
+
+    if (customerExists) {
+      this.logger.error(
+        `Creating super admin ${createSuperAdminDto.email} is denied : super admin already exists`,
+      );
+      throw new ConflictException();
+    }
+
+    const hashedPass = await bcrypt.hash(password, 10);
+
+    try {
+      await this.prisma.user.create({
+        data: {
+          ...createSuperAdminDto,
+          password: hashedPass,
+          role: "superadmin",
+        },
+      });
+
+      this.logger.log(
+        `Creating super admin ${createSuperAdminDto.email} is successful`,
+      );
+
+      return { message: "Super Admin created!" };
     } catch (error) {
       throw new BadRequestException();
     }

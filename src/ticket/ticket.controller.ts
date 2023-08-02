@@ -7,18 +7,19 @@ import {
   ParseIntPipe,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
-  Query,
+  UseInterceptors,
 } from "@nestjs/common";
 import {
   ApiBearerAuth,
-  ApiBody,
   ApiProperty,
   ApiQuery,
+  ApiResponse,
   ApiTags,
 } from "@nestjs/swagger";
-import { Rating, Roles } from "@prisma/client";
+import { Roles } from "@prisma/client";
 import { Request } from "express";
 import { AllowedRoles } from "src/auth/decorators/role.decorator";
 import { AuthGuard, IUserFromToken } from "src/auth/guards/auth.guard";
@@ -28,24 +29,34 @@ import {
   CreateTicketDto,
   RateDto,
   TicketAnswerDto,
+  TicketResponse,
+  TicketResponseDto,
   UpdateTicketDto,
 } from "./dtos/ticket.dto";
 import { TicketOwnershipGuard } from "./guards/ticketownership.guard";
 import { TicketService } from "./ticket.service";
+import { TicketResponseInterceptor } from "./interceptors/TicketResponse.interceptor";
+import {
+  ALL_TICKETS_RESPONSE,
+  ANSWER_TICKET_RESPONSE,
+  ASSIGN_TICKET_RESPONSE,
+  CANCEL_TICKET_RESPONSE,
+  CREATE_TICKET_RESPONSE,
+  GET_AGENT_TICKETS_RESPONSE,
+  GET_COSTOMER_TICKETS_RESPONSE,
+  PENDING_TICKETS_RESPONSE,
+  RATE_TICKET_RESPONSE,
+  REOPEN_TICKET_RESPONSE,
+  UPDATE_TICKET_RESPONSE,
+  WAITING_TICKETS_RESPONSE,
+} from "./constants/swagger-docs";
+import { ResponseDoc } from "src/shared/decorators/response-docs.decorator";
 
 class Nested {
   @ApiProperty()
   age: number;
   @ApiProperty()
   parent: string;
-}
-
-class QueryType {
-  @ApiProperty()
-  name: string;
-
-  @ApiProperty()
-  details: Nested;
 }
 
 @Controller("ticket")
@@ -57,12 +68,14 @@ export class TicketController {
 
   @Get("all")
   @AllowedRoles(Roles.admin)
+  @ResponseDoc(ALL_TICKETS_RESPONSE)
   getAllTickets() {
     return this.ticketService.getAllTickets();
   }
 
   @Get("waiting")
   @AllowedRoles(Roles.admin)
+  @ResponseDoc(WAITING_TICKETS_RESPONSE)
   getWaitingTickets() {
     return this.ticketService.getWaitingTickets();
   }
@@ -70,18 +83,21 @@ export class TicketController {
   @Post("/:id/reopen")
   @AllowedRoles(Roles.admin, Roles.customer)
   @UseGuards(TicketOwnershipGuard)
+  @ResponseDoc(REOPEN_TICKET_RESPONSE)
   reopenTicket(@Param("id", ParseIntPipe) ticketId: number) {
     return this.ticketService.reopenTicket(ticketId);
   }
 
   @Get("pending")
   @AllowedRoles(Roles.admin)
+  @ResponseDoc(PENDING_TICKETS_RESPONSE)
   getPendingTickets() {
     return this.ticketService.getPendingTickets();
   }
 
   @Post(":id/assign")
   @AllowedRoles(Roles.admin)
+  @ResponseDoc(ASSIGN_TICKET_RESPONSE)
   assignTicketToAgent(
     @Param("id", ParseIntPipe) ticketId: number,
     @Body() assignToAgent: AssignToAgentDto,
@@ -91,6 +107,7 @@ export class TicketController {
 
   @Get("customer")
   @AllowedRoles(Roles.customer, Roles.admin)
+  @ResponseDoc(GET_COSTOMER_TICKETS_RESPONSE)
   getCustomerTickets(@Req() request: Request) {
     const user: IUserFromToken = request["user"];
     return this.ticketService.getCustomerTickets(user.id);
@@ -98,6 +115,7 @@ export class TicketController {
 
   @Post("new")
   @AllowedRoles(Roles.customer, Roles.admin)
+  @ResponseDoc(CREATE_TICKET_RESPONSE)
   createTicket(@Body() ticket: CreateTicketDto, @Req() request: Request) {
     const user: IUserFromToken = request["user"];
     return this.ticketService.createTicket(ticket, user.id);
@@ -106,6 +124,7 @@ export class TicketController {
   @Get("agent/:id")
   @AllowedRoles(Roles.agent, Roles.admin)
   @UseGuards(TicketOwnershipGuard)
+  @ResponseDoc(GET_AGENT_TICKETS_RESPONSE)
   getAgentTickets(@Param("id", ParseIntPipe) agentId: number) {
     return this.ticketService.getAgentTickets(agentId);
   }
@@ -113,6 +132,7 @@ export class TicketController {
   @Delete(":id/cancel")
   @AllowedRoles(Roles.customer, Roles.admin)
   @UseGuards(TicketOwnershipGuard)
+  @ResponseDoc(CANCEL_TICKET_RESPONSE)
   cancelTicket(@Param("id", ParseIntPipe) ticketId: number) {
     return this.ticketService.cancelTicket(ticketId);
   }
@@ -120,6 +140,7 @@ export class TicketController {
   @Patch(":id")
   @AllowedRoles(Roles.customer, Roles.admin)
   @UseGuards(TicketOwnershipGuard)
+  @ResponseDoc(UPDATE_TICKET_RESPONSE)
   updateTicket(
     @Param("id", ParseIntPipe) ticketId: number,
     @Body() updatedTicket: UpdateTicketDto,
@@ -130,6 +151,7 @@ export class TicketController {
   @Post(":id/answer")
   @AllowedRoles(Roles.admin, Roles.agent)
   @UseGuards(TicketOwnershipGuard)
+  @ResponseDoc(ANSWER_TICKET_RESPONSE)
   answerTicket(
     @Param("id", ParseIntPipe) ticketId: number,
     @Body() ticketAnswer: TicketAnswerDto,
@@ -140,6 +162,7 @@ export class TicketController {
   @Post(":id/rating")
   @AllowedRoles(Roles.customer)
   @UseGuards(TicketOwnershipGuard)
+  @ResponseDoc(RATE_TICKET_RESPONSE)
   rateTicket(
     @Body() rating: RateDto,
     @Param("id", ParseIntPipe) ticketId: number,
@@ -150,12 +173,5 @@ export class TicketController {
   @Get("ratings")
   getRatings() {
     return this.ticketService.getRatings();
-  }
-
-  @Get("test")
-  @ApiQuery({ name: "query", type: QueryType })
-  test(@Query("query") query: any) {
-    console.log(query);
-    return "test";
   }
 }

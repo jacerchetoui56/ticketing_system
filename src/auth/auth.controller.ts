@@ -9,6 +9,7 @@ import {
   UseGuards,
 } from "@nestjs/common";
 import {
+  ApiBearerAuth,
   ApiBody,
   ApiConflictResponse,
   ApiCreatedResponse,
@@ -20,8 +21,16 @@ import {
 import { Roles } from "@prisma/client";
 import { Request } from "express";
 import { AuthService } from "./auth.service";
-import { CreateAgentDto, CustomerSignupDto, LoginDto } from "./dtos/auth.dto";
+import {
+  CreateAdminDto,
+  CreateAgentDto,
+  CreateSuperAdminDto,
+  CustomerSignupDto,
+  LoginDto,
+} from "./dtos/auth.dto";
 import { AuthGuard } from "./guards/auth.guard";
+import { AllowedRoles } from "./decorators/role.decorator";
+import { RoleGuard } from "./guards/role.guard";
 
 @ApiTags("Auth")
 @Controller("auth")
@@ -82,7 +91,26 @@ export class AuthController {
     return this.authService.createAgent(newAgent);
   }
 
+  @Post("superadmin/new")
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RoleGuard)
+  @AllowedRoles(Roles.superadmin)
+  @ApiCreatedResponse({ description: "superadmin created!" })
+  createSuperAdmin(@Body() newSuperAdmin: CreateSuperAdminDto) {
+    return this.authService.createSuperAdmin(newSuperAdmin);
+  }
+
+  @Post("admin/new")
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard, RoleGuard)
+  @AllowedRoles(Roles.superadmin)
+  @ApiCreatedResponse({ description: "admin created!" })
+  createAdmin(@Body() newAdmin: CreateAdminDto) {
+    return this.authService.createAdmin(newAdmin);
+  }
+
   @Get("profile")
+  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   getCustomerProfile(@Req() request: Request) {
     const { id } = request["user"];

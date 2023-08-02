@@ -7,6 +7,35 @@ import {
   IsString,
   MinLength,
 } from "class-validator";
+import { Exclude } from "class-transformer";
+import { Roles } from "@prisma/client";
+
+export class UserDTO {
+  @ApiProperty()
+  id: number;
+
+  @ApiProperty()
+  name: string;
+
+  @Exclude()
+  email: string;
+
+  @Exclude()
+  password: string;
+
+  @ApiProperty()
+  joined_at: Date;
+
+  @ApiProperty()
+  teamId?: number | null; // Mark it as optional if it can be null
+
+  @Exclude()
+  role: Roles;
+
+  constructor(partial: Partial<UserDTO>) {
+    Object.assign(this, partial);
+  }
+}
 
 export class LoginDto {
   @ApiProperty()
@@ -60,3 +89,6 @@ export class CreateAgentDto extends CustomerSignupDto {
   @IsNotEmpty()
   teamId: number;
 }
+
+export class CreateAdminDto extends CustomerSignupDto {}
+export class CreateSuperAdminDto extends CreateAdminDto {}

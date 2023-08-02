@@ -1,7 +1,7 @@
 import { Module } from "@nestjs/common";
+import { AuthModule } from "src/auth/auth.module";
 import { TeamController } from "./team.controller";
 import { TeamService } from "./team.service";
-import { AuthModule } from "src/auth/auth.module";
 
 @Module({
   imports: [AuthModule],

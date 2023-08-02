@@ -1,13 +1,14 @@
-import { BadRequestException, Injectable, Logger } from "@nestjs/common";
-import { PrismaService } from "src/prisma/prisma.service";
-import {
-  TicketAnswerDto,
-  CreateTicketDto,
-  UpdateTicketDto,
-  RateDto,
-} from "./dtos/ticket.dto";
+import { BadRequestException, Injectable } from "@nestjs/common";
 import { Rating } from "@prisma/client";
+import { PrismaService } from "src/prisma/prisma.service";
 import { MyLogger } from "../my-logger/my-logger.service";
+import {
+  CreateTicketDto,
+  RateDto,
+  TicketAnswerDto,
+  TicketResponse,
+  UpdateTicketDto,
+} from "./dtos/ticket.dto";
 
 @Injectable()
 export class TicketService {
@@ -17,24 +18,12 @@ export class TicketService {
   ) {}
 
   async getAllTickets() {
-    this.logger.log("getting all tickets");
+    // this.logger.log("getting all tickets");
+    console.log("getting all tickets");
     const tickets = await this.prisma.ticket.findMany({
-      select: {
-        id: true,
-        customer: {
-          select: { id: true, name: true },
-        },
-        question: true,
-        agent: {
-          select: { id: true, name: true },
-        },
-        rating: true,
-        state: true,
-        answer: {
-          select: {
-            answer: true,
-          },
-        },
+      include: {
+        agent: true,
+        customer: true,
       },
     });
 
@@ -47,6 +36,10 @@ export class TicketService {
       where: {
         state: "WAITING",
       },
+      include: {
+        agent: true,
+        customer: true,
+      },
     });
 
     return tickets;
@@ -57,6 +50,10 @@ export class TicketService {
     const tickets = await this.prisma.ticket.findMany({
       where: {
         state: "PENDING",
+      },
+      include: {
+        agent: true,
+        customer: true,
       },
     });
 
@@ -72,6 +69,10 @@ export class TicketService {
           in: ["WAITING", "PENDING"],
         },
       },
+      include: {
+        agent: true,
+        customer: true,
+      },
     });
 
     return tickets;
@@ -85,6 +86,10 @@ export class TicketService {
         customerId,
         state: "WAITING",
       },
+      include: {
+        agent: true,
+        customer: true,
+      },
     });
     return ticket;
   }
@@ -93,14 +98,14 @@ export class TicketService {
     this.logger.log(`Assigning ticket #${ticketId} to Agent #${agentId}`);
     const alreadyAssigned = await this.prisma.ticket.findUnique({
       where: { id: ticketId },
-      select: { agentId: true, agent: { select: { name: true } }, state: true },
+      select: TicketResponse,
     });
 
     if (!alreadyAssigned) {
       throw new BadRequestException();
     }
 
-    if (alreadyAssigned.agentId) {
+    if (alreadyAssigned.agent.id) {
       throw new BadRequestException(
         `Ticket already assigned to ${alreadyAssigned.agent.name}`,
       );
@@ -129,6 +134,10 @@ export class TicketService {
         state: {
           in: ["WAITING", "PENDING"],
         },
+      },
+      include: {
+        agent: true,
+        customer: true,
       },
     });
 
@@ -170,6 +179,10 @@ export class TicketService {
       where: { id: ticketId },
       data: {
         question: updates.question,
+      },
+      include: {
+        agent: true,
+        customer: true,
       },
     });
 
@@ -215,6 +228,10 @@ export class TicketService {
     const ticket = await this.prisma.ticket.update({
       where: { id: ticketId },
       data: { state: "CANCELED" },
+      include: {
+        agent: true,
+        customer: true,
+      },
     });
     return ticket;
   }
@@ -231,6 +248,10 @@ export class TicketService {
     const ticket = await this.prisma.ticket.update({
       where: { id: ticketId },
       data: { state: "WAITING" },
+      include: {
+        agent: true,
+        customer: true,
+      },
     });
 
     return ticket;
@@ -243,6 +264,10 @@ export class TicketService {
       data: {
         rating,
         state: "COMPLETED",
+      },
+      include: {
+        agent: true,
+        customer: true,
       },
     });
 

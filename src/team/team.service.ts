@@ -2,6 +2,7 @@ import { BadRequestException, Injectable } from "@nestjs/common";
 import { PrismaService } from "src/prisma/prisma.service";
 import { CreateFieldDto, CreateTeamDto } from "./dtos/team.dto";
 import { MyLogger } from "src/my-logger/my-logger.service";
+import { UserDTO } from "src/auth/dtos/auth.dto";
 
 @Injectable()
 export class TeamService {
@@ -12,7 +13,11 @@ export class TeamService {
 
   async getAllTeams() {
     this.logger.log(`Getting all teams`);
-    const teams = await this.prisma.team.findMany();
+    const teams = await this.prisma.team.findMany({
+      include: {
+        field: true,
+      },
+    });
 
     return teams;
   }
@@ -42,10 +47,9 @@ export class TeamService {
         role: "agent",
         teamId,
       },
-      select: { id: true, name: true, email: true },
     });
 
-    return agents;
+    return agents.map((agent) => new UserDTO(agent));
   }
 
   async createTeam(newTeam: CreateTeamDto) {
