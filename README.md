@@ -14,7 +14,7 @@ A "ticketing system" is a software tool used by businesses and organizations to 
 npm install
 ```
 
-4. You need to create a .env file in the root directory of the project and add the following variables
+4. You need to change the .env file.
 
 ```bash
 DATABASE_URL="YOUR_POSTGRES_DATABASE_URL"
@@ -27,24 +27,19 @@ JWT_SECRET_KEY = "YOUR_JWT_SECRET_KEY"
 npm run start:dev
 ```
 
-6. Before trying to work with the API you need to first open the prisma studio using the command below
+6. You can open the prisma studio using the command below
 
 ```bash
 npx prisma studio
 ```
 
-And then create a superadmin manually. Here is an example of a superadmin object
-
-```json
-{
-    "name" : "super admin"
-    "email": "superadmin@gmail.com",
-    "password": "$2a$10$Md3hfWEepeCqZbfWDyaQoOkjwniomlCnsBt6y8pSL/x2eo/8R..9.",
-    "role": "superadmin"
-}
-```
-
 > The reason why we suggest using prisma studio is its support for _static typing_.
+
+7. Seed the database with the following command to insert the first superadmin user with the credentials in postman (or in the **seed.ts** file).
+
+```bash
+npx prisma db seed
+```
 
 7. Open Swagger UI in your browser by going to the following URL
 
